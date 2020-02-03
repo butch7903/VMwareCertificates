@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			April 19, 2019
-	Version:		1.0
+	Date:			February 3, 2020
+	Version:		2.0
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -24,11 +24,6 @@
 ##LogInsight Certicate Customizable Variables
 $LogInsightNAME = "loginsight" #Short name for your LogInsightA (not FQDN)
 $LogInsightIP = "192.168.1.40" #Example 10.27.1.12 #Note you may want to specify all IPs for your Log Insight cluster other than your VIP IP here.
-#$LogInsightIP1 = "IP1Here"
-#$LogInsightIP2 = "IP1Here"
-#$LogInsightIP3 = "IP1Here"
-$LogInsightNETMASK = "255.255.255.0" #Example 255.255.255.0
-$LogInsightGATEWAY = "10.1.152.1" #Example 192.168.1.1
 $LogInsightDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
 $LogInsightNAME = $LogInsightNAME.ToLower() #LogInsightNAME Should be lower case
@@ -38,7 +33,8 @@ $STATE = "KS" #Your State
 $CITY = "Wichita" #Your City
 $COMPANY = "Hamker Tech" #Your Company
 $DEPARTMENT = "IT" #Your Department
-$CAFILELOCATION = "C:\certs\CAs\Combined\CombinedCA_HAMCA01-CA-PEM.pem" #Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
+$EMAILADDRESS = "YourDepartmentEmail@here.com" #Department Email								  
+$CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
 
 #Standard Variables
@@ -131,6 +127,7 @@ IF($OPENSSL)
 	O=$COMPANY
 	OU=$DEPARTMENT
 	CN=$LogInsightFQDN
+	emailAddress=$EMAILADDRESS
 	"
 
 	#Open OpenSSL EXE Location
@@ -194,6 +191,10 @@ IF($OPENSSL)
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}
 	
+	#Read CSR
+	Write-Host "CSR Info is:" $LogInsightCSR -ForegroundColor Blue
+	.\openssl req -in $LogInsightCSR -noout -text
+	
 	$CA = certutil -config $CERTIFICATESERVER -ping
 	$CA = $CA[1]
 	$CA = $CA.Replace("Server "," ")
@@ -201,7 +202,7 @@ IF($OPENSSL)
 	$CA = $CA.Replace('"','')
 	$CA = $CA.Replace(' ','')
 
-	#To List the Certiicate Templates to get the right 1
+	#To List the Certificate Templates to get the right 1
 	#certutil -template | Select-String -Pattern TemplatePropCommonName
 	#Detailed Example certutil -template | Select-String -Pattern Vmware6.0WebServer
 	
@@ -215,35 +216,69 @@ IF($OPENSSL)
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}
 	
-	#Convert CER to PEM
-	IF(!$LogInsightPEMGET)
+	IF($LogInsightCERGET)
+					   
 	{
-		#Open OpenSSL EXE Location
-		CD $OpenSSLLocation
-		.\openssl x509 -in $LogInsightCER -outform PEM -out $LogInsightPEM
-		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	}else {
-		Write-Host "Server.pem already generated at" $LogInsightPEM -ForegroundColor Green
-		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		Write-Host "Log Insight CER Found, proceeding with copying cert and combining certificate"
+		
+		#Read CER File Info
+		$CERTPRINT = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+        $CERTPRINT.Import($LogInsightCERGET.FullName)
+		$ISSUINGCA = $certPrint.IssuerName.Name
+		$ISSUINGCATEMP1 = $ISSUINGCA.Split(",")
+		$ISSUINGCATEMP2 = $ISSUINGCATEMP1.Split("=")
+		$ISSUINGCASEL = $ISSUINGCATEMP2[1]
+		Write-Host "Issuing CA for CER is:"$ISSUINGCASEL
+		
+		#Convert CER to PEM
+		IF(!$LogInsightPEMGET)
+		{
+			#Open OpenSSL EXE Location
+			CD $OpenSSLLocation
+			.\openssl x509 -in $LogInsightCER -outform PEM -out $LogInsightPEM
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		}else {
+			Write-Host "Server.pem already generated at" $LogInsightPEM -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		}
+		
+		
+		#Finding Combined CA PEM File that matches issuing CA for CER
+		Write-Host "Finding CA PEM File CA:"$ISSUINGCASEL
+		$CAFILELIST = Get-ChildItem $CAFILELOCATION | where {$_.extension -eq ".pem" -and $_.name -match $ISSUINGCASEL}
+		
+		IF($CAFILELIST.count -eq 1)
+		{
+			#Place your CA Cert to the LogInsight folder
+			Write-Host "Copying CA PEM File to LogInsight Cert folder" -ForegroundColor Green
+			Write-Host "Copying $CAFILELIST.FullName to $CACERT"
+			Copy-Item $CAFILELIST.FullName $CACERT -ErrorAction SilentlyContinue
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			
+			#Create Full Chain LogInsight PEM File
+			Write-Host "Creating Full Chain LogInsight PEM File" -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			$STEP1 = Get-Content $LogInsightKEYPEM
+			$STEP2 = Get-Content $LogInsightPEM 
+			$STEP3 = Get-Content $CACERT 
+			$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
+			$COMBINESTEPS | Set-Content $LogInsightCOMBINEDPEM
+			
+			#Output name of pem full chain
+			CD $OpenSSLLocation
+			#openssl x509 -in certificate.crt -text -noout
+			Write-Host "Reading Combined PEM file to verify configuration of file:" -ForegroundColor Green
+			.\openssl x509 -in $LogInsightCOMBINEDPEM -text -noout
+			
+			Write-Host "LogInsight Certificate Generation Process Completed" $LogInsightCOMBINEDPEM -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+		}Else{
+		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
+		}
+	}Else{
+	Write-Error "CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script"
 	}
-	
-	#Copy CA Cert to Local Workstation
-	#Place your CA Cert to the LogInsight folder
-	Write-Host "Copying CA PEM File to LogInsight Cert folder"
-	Copy-Item $CAFILELOCATION $CACERT -ErrorAction SilentlyContinue
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	
-	#Create Full Chain LogInsight PEM File
-	Write-Host "Create Full Chain LogInsight PEM File"
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	$STEP1 = Get-Content $LogInsightKEYPEM
-	$STEP2 = Get-Content $LogInsightPEM 
-	$STEP3 = Get-Content $CACERT 
-	$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
-	$COMBINESTEPS | Set-Content $LogInsightCOMBINEDPEM
-	Write-Host "LogInsight Certificate Generation Process Completed" $LogInsightCOMBINEDPEM -ForegroundColor Green
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 }
 
 Write-Host "Use this file to install the cert on your LogInsight Cluster" $LogInsightCOMBINEDPEM -ForegroundColor Green
@@ -258,5 +293,11 @@ Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 Stop-Transcript
 
-Write-Host "This script has completed its tasks"
-
+##Script Completed
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "Script Completed"
+Write-Host "Press Enter to close this PowerShell Script"
+PAUSE
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
