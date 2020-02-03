@@ -223,7 +223,7 @@ IF($OPENSSL)
 		
 		#Read CER File Info
 		$CERTPRINT = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-        $CERTPRINT.Import($LogInsightCERGET.FullName)
+		$CERTPRINT.Import($LogInsightCERGET.FullName)
 		$ISSUINGCA = $certPrint.IssuerName.Name
 		$ISSUINGCATEMP1 = $ISSUINGCA.Split(",")
 		$ISSUINGCATEMP2 = $ISSUINGCATEMP1.Split("=")
