@@ -296,7 +296,7 @@ Write-Host "export NSX_MANAGER_IP_ADDRESS=IPADDRESSHERE"
 Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.59"
 Write-Host 'export CERTIFICATE_ID="ID-Number-Here"' 
 Write-Host 'Example: export CERTIFICATE_ID="eac3cddd-adba-4865-b748-616a364c9847"' #Replace the ID# with the ID of your Certificate
-Write-Host 'curl --insecure -u admin:'RootPASSWORDHERE' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/cluster/api-certificate?action=set_cluster_certificate&certificate_id=$CERTIFICATE_ID"'
+Write-Host 'curl --insecure -u admin:''RootPASSWORDHERE'' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/cluster/api-certificate?action=set_cluster_certificate&certificate_id=$CERTIFICATE_ID"'
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
