@@ -287,6 +287,8 @@ Write-Host "Use this file to install the cert on your NSX-T Manager Cluster" $NS
 Write-Host "Use this file to install the RSA Key on your NSX-T Manager Cluster" $NSXTManagerKEY -ForegroundColor Green
 
 #Show Directions on How to install in NSX-T
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 Write-Host " "
 Write-Host "After the certificate has been uploaded to NSX-T Manager, follow these instructions to install the certificate"
 Write-Host "Document the VIP Certificate's ID #"
@@ -297,6 +299,9 @@ Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.59"
 Write-Host 'export CERTIFICATE_ID="ID-Number-Here"' 
 Write-Host 'Example: export CERTIFICATE_ID="eac3cddd-adba-4865-b748-616a364c9847"' #Replace the ID# with the ID of your Certificate
 Write-Host 'curl --insecure -u admin:''RootPASSWORDHERE'' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/cluster/api-certificate?action=set_cluster_certificate&certificate_id=$CERTIFICATE_ID"'
+Write-Host "Reference: https://docs.pivotal.io/pks/1-6/nsxt-generate-ca-cert.html"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
