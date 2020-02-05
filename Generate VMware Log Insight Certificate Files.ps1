@@ -9,13 +9,13 @@
 	===========================================================================
 
 	.SYNOPSIS
-		This script automates the full server build process for vSphere Integrated Containers. This includes generating all certificates
+		This script generates a certificate in the proper format for VMware Log Insight. This includes generating all certificates
 		using a Windows CA and CA Template. You must open this script and change the variables to match your environment and then execute
 		the PS1 file.
 
 	.DESCRIPTION
-		Use this script to build the vSphere Integrated Containers Appliance. Fill in the variables and then simply run this script to
-		automate the process of deploying vSphere Integrated Containers.
+		Use this script to build the certificate. Fill in the variables and then simply run this script to
+		automate the process of generating the certificate.
 
 	.NOTES
 		
@@ -216,14 +216,17 @@ IF($OPENSSL)
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}
 	
-	IF($LogInsightCERGET)
+	#Checking if CER was Generated
+	$LogInsightCERGETAGAIN = Get-Item "$LogInsightCertLocation\$LogInsightNAME.cer" -ErrorAction SilentlyContinue
+	
+	IF($LogInsightCERGETAGAIN)
 					   
 	{
 		Write-Host "Log Insight CER Found, proceeding with copying cert and combining certificate"
 		
 		#Read CER File Info
 		$CERTPRINT = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-		$CERTPRINT.Import($LogInsightCERGET.FullName)
+		$CERTPRINT.Import($LogInsightCERGETAGAIN.FullName)
 		$ISSUINGCA = $certPrint.IssuerName.Name
 		$ISSUINGCATEMP1 = $ISSUINGCA.Split(",")
 		$ISSUINGCATEMP2 = $ISSUINGCATEMP1.Split("=")
