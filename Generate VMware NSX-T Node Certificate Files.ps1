@@ -299,6 +299,7 @@ Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.59"
 Write-Host 'export CERTIFICATE_ID="ID-Number-Here"' 
 Write-Host 'Example: export CERTIFICATE_ID="f17d761a-a8e0-4251-a3f6-6c73388df820"' #Replace the ID# with the ID of your Certificate
 Write-Host 'curl --insecure -u admin:''RootPASSWORDHERE'' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/node/services/http?action=apply_certificate&certificate_id=$CERTIFICATE_ID"'
+Write-Host "Reference: https://docs.vmware.com/en/VMware-NSX-T-Data-Center/2.5/administration/GUID-50C36862-A29D-48FA-8CE7-697E64E10E37.html"
 Write-Host "Reference: https://docs.pivotal.io/pks/1-6/nsxt-generate-ca-cert.html"
 Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 Write-Host "-----------------------------------------------------------------------------------------------------------------------"
