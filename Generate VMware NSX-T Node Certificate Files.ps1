@@ -295,7 +295,7 @@ Write-Host "Document the Node Certificate's ID #"
 Write-Host "SSH to NSX Node IP"
 Write-Host "Run these commands to set the certificate as the Node Certificate"
 Write-Host "export NSX_MANAGER_IP_ADDRESS=IPADDRESSHERE" 
-Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.59"
+Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.61"
 Write-Host 'export CERTIFICATE_ID="ID-Number-Here"' 
 Write-Host 'Example: export CERTIFICATE_ID="f17d761a-a8e0-4251-a3f6-6c73388df820"' #Replace the ID# with the ID of your Certificate
 Write-Host 'curl --insecure -u admin:''RootPASSWORDHERE'' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/node/services/http?action=apply_certificate&certificate_id=$CERTIFICATE_ID"'
