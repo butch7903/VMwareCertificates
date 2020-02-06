@@ -221,7 +221,7 @@ IF($OPENSSL)
 	
 	IF($NSXTNodeCERGETAGAIN)			   
 	{
-		Write-Host "NSX-T Manager CER Found, proceeding with copying cert and combining certificate"
+		Write-Host "NSX-T Node CER Found, proceeding with copying cert and combining certificate"
 		
 		#Read CER File Info
 		$CERTPRINT = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
