@@ -283,9 +283,25 @@ IF($OPENSSL)
 	}
 }
 
-Write-Host "Use this file to install the cert on your NSX-T Manager Cluster" $NSXTNodeCOMBINEDPEM -ForegroundColor Green
-Write-Host "Use this file to install the RSA Key on your NSX-T Manager Cluster" $NSXTNodeKEY -ForegroundColor Green
-Write-Host "Note: Only install Certificate on NSX-T Manager Directly if you are not using a load balancer"
+Write-Host "Use this file to install the cert on your NSX-T Manager Cluster for Each Node" $NSXTNodeCOMBINEDPEM -ForegroundColor Green
+Write-Host "Use this file to install the RSA Key on your NSX-T Manager Cluster for Each Node" $NSXTNodeKEY -ForegroundColor Green
+
+#Show Directions on How to install in NSX-T
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host " "
+Write-Host "After the certificate has been uploaded to NSX-T Manager, follow these instructions to install the certificate"
+Write-Host "Document the Node Certificate's ID #"
+Write-Host "SSH to NSX Node IP"
+Write-Host "Run these commands to set the certificate as the Node Certificate"
+Write-Host "export NSX_MANAGER_IP_ADDRESS=IPADDRESSHERE" 
+Write-Host "Example: export NSX_MANAGER_IP_ADDRESS=192.168.1.59"
+Write-Host 'export CERTIFICATE_ID="ID-Number-Here"' 
+Write-Host 'Example: export CERTIFICATE_ID="f17d761a-a8e0-4251-a3f6-6c73388df820"' #Replace the ID# with the ID of your Certificate
+Write-Host 'curl --insecure -u admin:''RootPASSWORDHERE'' -X POST "https://$NSX_MANAGER_IP_ADDRESS/api/v1/node/services/http?action=apply_certificate&certificate_id=$CERTIFICATE_ID"'
+Write-Host "Reference: https://docs.pivotal.io/pks/1-6/nsxt-generate-ca-cert.html"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
