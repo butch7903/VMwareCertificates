@@ -125,8 +125,8 @@ IF($OPENSSL)
 	[ req_distinguished_name ]
 	CN = $VCSAFQDN 					#NAME (eg, example.com)
 	C = $COUNTRY					#Country
-	ST = $STATE						#State
-	L = $CITY						#Locality
+	ST = $STATE					#State
+	L = $CITY					#Locality
 	O = $COMPANY					#Organization
 	OU = $DEPARTMENT				#OrgUnit
 	emailAddress = $EMAILADDRESS	#emailAddress #Note: Added this field (not std version vs VCSA CSR), as required for certain business requirements.
