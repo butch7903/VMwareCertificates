@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			February 5, 2020
-	Version:		1.0
+	Date:			March 17, 2020
+	Version:		1.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -39,8 +39,8 @@ $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you 
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$NSXTManagerCertLocationGet = Get-Item "$CERTLOCATION\NSXTManager" -ErrorAction SilentlyContinue
-$NSXTManagerCertLocation = "$CERTLOCATION\NSXTManager"
+$NSXTManagerCertLocationGet = Get-Item "$CERTLOCATION\NSXT\$NSXTManagerNAME" -ErrorAction SilentlyContinue
+$NSXTManagerCertLocation = "$CERTLOCATION\NSXT\$NSXTManagerNAME"
 $NSXTManagerKEYGET = Get-Item "$NSXTManagerCertLocation\$NSXTManagerNAME.key" -ErrorAction SilentlyContinue
 $NSXTManagerKEY = "$NSXTManagerCertLocation\$NSXTManagerNAME.key" # This is in RSA format
 $NSXTManagerKEYPEMGET = Get-Item "$NSXTManagerCertLocation\$NSXTManagerNAME-key.pem" -ErrorAction SilentlyContinue
