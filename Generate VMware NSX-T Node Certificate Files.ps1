@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			February 5, 2020
-	Version:		1.0
+	Date:			March 17, 2020
+	Version:		1.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -39,8 +39,8 @@ $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you 
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$NSXTNodeCertLocationGet = Get-Item "$CERTLOCATION\NSXTNode\$NSXTNodeNAME" -ErrorAction SilentlyContinue
-$NSXTNodeCertLocation = "$CERTLOCATION\NSXTNode\$NSXTNodeNAME"
+$NSXTNodeCertLocationGet = Get-Item "$CERTLOCATION\NSXT\$NSXTNodeNAME" -ErrorAction SilentlyContinue
+$NSXTNodeCertLocation = "$CERTLOCATION\NSXT\$NSXTNodeNAME"
 $NSXTNodeKEYGET = Get-Item "$NSXTNodeCertLocation\$NSXTNodeNAME.key" -ErrorAction SilentlyContinue
 $NSXTNodeKEY = "$NSXTNodeCertLocation\$NSXTNodeNAME.key" # This is in RSA format
 $NSXTNodeKEYPEMGET = Get-Item "$NSXTNodeCertLocation\$NSXTNodeNAME-key.pem" -ErrorAction SilentlyContinue
