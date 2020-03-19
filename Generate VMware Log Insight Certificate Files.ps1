@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			February 3, 2020
-	Version:		2.0
+	Date:			March 19, 2020
+	Version:		2.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -39,8 +39,8 @@ $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you 
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$LogInsightCertLocationGet = Get-Item "$CERTLOCATION\LogInsight" -ErrorAction SilentlyContinue
-$LogInsightCertLocation = "$CERTLOCATION\LogInsight"
+$LogInsightCertLocationGet = Get-Item "$CERTLOCATION\LogInsight\$LogInsightFQDN" -ErrorAction SilentlyContinue
+$LogInsightCertLocation = "$CERTLOCATION\LogInsight\$LogInsightFQDN"
 $LogInsightKEYGET = Get-Item "$LogInsightCertLocation\$LogInsightNAME.key" -ErrorAction SilentlyContinue
 $LogInsightKEY = "$LogInsightCertLocation\$LogInsightNAME.key" # This is in RSA format
 $LogInsightKEYPEMGET = Get-Item "$LogInsightCertLocation\$LogInsightNAME-key.pem" -ErrorAction SilentlyContinue
