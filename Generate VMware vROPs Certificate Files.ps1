@@ -2,19 +2,19 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			April 19, 2019
-	Version:		1.0
+	Date:			March 20, 2020
+	Version:		2.0
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
 
 	.SYNOPSIS
-		This script automates the full server build process for vSphere Integrated Containers. This includes generating all certificates
+		This script automates the generation of certificates for VMware vROPs. This includes generating all certificates
 		using a Windows CA and CA Template. You must open this script and change the variables to match your environment and then execute
 		the PS1 file.
 
 	.DESCRIPTION
-		Use this script to build the vSphere Integrated Containers Appliance. Fill in the variables and then simply run this script to
+		Use this script to build the certificate structure. Fill in the variables and then simply run this script to
 		automate the process of deploying vSphere Integrated Containers.
 
 	.NOTES
@@ -22,10 +22,8 @@
 #>
 
 ##VROPS Certicate Customizable Variables
-$VROPSNAME = "vrops" #Short name for your VROPSA (not FQDN)
+$VROPSNAME = "vrops" #Short name for your vROPs node (not FQDN)
 $VROPSIP = "192.168.1.55" #Example 10.27.1.12
-$VROPSNETMASK = "255.255.255.0" #Example 255.255.255.0
-$VROPSGATEWAY = "192.168.1.1" #Example 192.168.1.1
 $VROPSDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
 $VROPSNAME = $VROPSNAME.ToLower() #VROPSNAME Should be lower case
@@ -35,13 +33,14 @@ $STATE = "KS" #Your State
 $CITY = "Wichita" #Your City
 $COMPANY = "Hamker Tech" #Your Company
 $DEPARTMENT = "IT" #Your Department
+$EMAILADDRESS = "YourDepartmentEmail@here.com" #Department Email								  
+$CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
-$CAFILELOCATION = "C:\certs\CAs\Combined\CombinedCA_HAMCA01-CA-PEM.pem" #Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$VROPSCertLocationGet = Get-Item "$CERTLOCATION\VROPS" -ErrorAction SilentlyContinue
-$VROPSCertLocation = "$CERTLOCATION\VROPS"
+$VROPSCertLocationGet = Get-Item "$CERTLOCATION\VROPS\$VROPSFQDN" -ErrorAction SilentlyContinue
+$VROPSCertLocation = "$CERTLOCATION\VROPS\$VROPSFQDN"
 $VROPSKEYGET = Get-Item "$VROPSCertLocation\$VROPSNAME.key" -ErrorAction SilentlyContinue
 $VROPSKEY = "$VROPSCertLocation\$VROPSNAME.key" # This is in RSA format
 $VROPSKEYPEMGET = Get-Item "$VROPSCertLocation\$VROPSNAME-key.pem" -ErrorAction SilentlyContinue
@@ -52,7 +51,7 @@ $VROPSCERGET = Get-Item "$VROPSCertLocation\$VROPSNAME.cer" -ErrorAction Silentl
 $VROPSCER = "$VROPSCertLocation\$VROPSNAME.cer" #This is in DER format
 $VROPSPEMGET = Get-Item "$VROPSCertLocation\$VROPSNAME.pem" -ErrorAction SilentlyContinue
 $VROPSPEM = "$VROPSCertLocation\$VROPSNAME.pem" # This is in PEM format
-$VROPSCOMBINEDPEM = "$VROPSCertLocation\$VROPSNAME-combinedPEM.pem" # This is in PEM format. This is the file you use to update vROPs with.
+$VROPSCOMBINEDPEM = "$VROPSCertLocation\$VROPSNAME-sslCertificateChain.pem" # This is in PEM format. This is the file you use to update VROPS with.
 
 #Certificate Variables
 $CACERT = "$VROPSCertLocation\CA.pem" #This must be in PEM format, note this is copied from a network location typically #Example CombinedCA_HAMCA01-CA-PEM.pem
@@ -100,8 +99,9 @@ IF(!$OPENSSL)
 IF($OPENSSL)
 {
 	#CNF Config
+	#Note: Update the below with the other IPs of the cluster with Ip.2 = $VROPSIP1, etc.
 	$CNF = "[ req ]
-	default_md = sha512
+	default_md = sha256
 	default_bits = 2048
 	default_keyfile = key.key
 	distinguished_name = req_distinguished_name
@@ -127,6 +127,7 @@ IF($OPENSSL)
 	O=$COMPANY
 	OU=$DEPARTMENT
 	CN=$VROPSFQDN
+	emailAddress=$EMAILADDRESS
 	"
 
 	#Open OpenSSL EXE Location
@@ -166,8 +167,8 @@ IF($OPENSSL)
 	
 	IF(!$VROPSKEYPEMGET)
 	{
-		Write-Host "VROPSA-key.pem file does not exist"
-		Write-Host "Generating VROPSA-key.pem file"
+		Write-Host "VROPS-key.pem file does not exist"
+		Write-Host "Generating VROPS-key.pem file"
 		#Open OpenSSL EXE Location
 		CD $OpenSSLLocation
 		.\openssl pkcs8 -topk8 -in $VROPSKEY -outform PEM -nocrypt -out $VROPSKEYPEM
@@ -179,8 +180,8 @@ IF($OPENSSL)
 
 	IF(!$VROPSCSRGET)
 	{
-		Write-Host "VROPSA CSR File Not Found"
-		Write-Host "Generating VROPSA CSR"
+		Write-Host "VROPS CSR File Not Found"
+		Write-Host "Generating VROPS CSR"
 		#Open OpenSSL EXE Location
 		CD $OpenSSLLocation
 		.\openssl req -config $CFGFILEFULLNAME -new -key $VROPSKEY -out $VROPSCSR
@@ -190,6 +191,10 @@ IF($OPENSSL)
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}
 	
+	#Read CSR
+	Write-Host "CSR Info is:" $VROPSCSR -ForegroundColor Blue
+	.\openssl req -in $VROPSCSR -noout -text
+	
 	$CA = certutil -config $CERTIFICATESERVER -ping
 	$CA = $CA[1]
 	$CA = $CA.Replace("Server "," ")
@@ -197,7 +202,7 @@ IF($OPENSSL)
 	$CA = $CA.Replace('"','')
 	$CA = $CA.Replace(' ','')
 
-	#To List the Certiicate Templates to get the right 1
+	#To List the Certificate Templates to get the right 1
 	#certutil -template | Select-String -Pattern TemplatePropCommonName
 	#Detailed Example certutil -template | Select-String -Pattern Vmware6.0WebServer
 	
@@ -211,39 +216,79 @@ IF($OPENSSL)
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}
 	
-	#Convert CER to PEM
-	IF(!$VROPSPEMGET)
+	#Checking if CER was Generated
+	$VROPSCERGETAGAIN = Get-Item "$VROPSCertLocation\$VROPSNAME.cer" -ErrorAction SilentlyContinue
+	
+	IF($VROPSCERGETAGAIN)			   
 	{
-		#Open OpenSSL EXE Location
-		CD $OpenSSLLocation
-		.\openssl x509 -in $VROPSCER -outform PEM -out $VROPSPEM
-		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	}else {
-		Write-Host "Server.pem already generated at" $VROPSPEM -ForegroundColor Green
-		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		Write-Host "vROPs Manager CER Found, proceeding with copying cert and combining certificate"
+		
+		#Read CER File Info
+		$CERTPRINT = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+		$CERTPRINT.Import($VROPSCERGETAGAIN.FullName)
+		$ISSUINGCA = $certPrint.IssuerName.Name
+		$ISSUINGCATEMP1 = $ISSUINGCA.Split(",")
+		$ISSUINGCATEMP2 = $ISSUINGCATEMP1.Split("=")
+		$ISSUINGCASEL = $ISSUINGCATEMP2[1]
+		Write-Host "Issuing CA for CER is:"$ISSUINGCASEL
+		
+		#Convert CER to PEM
+		IF(!$VROPSPEMGET)
+		{
+			#Open OpenSSL EXE Location
+			CD $OpenSSLLocation
+			.\openssl x509 -in $VROPSCER -outform PEM -out $VROPSPEM
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		}else {
+			Write-Host "Server.pem already generated at" $VROPSPEM -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+		}
+		
+		
+		#Finding Combined CA PEM File that matches issuing CA for CER
+		Write-Host "Finding CA PEM File CA:"$ISSUINGCASEL
+		$CAFILELIST = Get-ChildItem $CAFILELOCATION | where {$_.extension -eq ".pem" -and $_.name -match $ISSUINGCASEL}
+		
+		IF($CAFILELIST.count -eq 1)
+		{
+			#Place your CA Cert to the VROPS folder
+			Write-Host "Copying CA PEM File to VROPS Cert folder" -ForegroundColor Green
+			Write-Host "Copying $CAFILELIST.FullName to $CACERT"
+			Copy-Item $CAFILELIST.FullName $CACERT -ErrorAction SilentlyContinue
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			
+			#Create Full Chain vROPS PEM File
+			Write-Host "Create Full Chain vROPS PEM File"
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			$STEP1 = Get-Content $VROPSKEYPEM
+			$STEP2 = Get-Content $VROPSPEM 
+			$STEP3 = Get-Content $CACERT 
+			$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
+			$COMBINESTEPS | Set-Content $VROPSCOMBINEDPEM
+			
+			#Output name of pem full chain
+			CD $OpenSSLLocation
+			#openssl x509 -in certificate.crt -text -noout
+			Write-Host "Reading Combined PEM file to verify configuration of file:" -ForegroundColor Green
+			.\openssl x509 -in $VROPSCOMBINEDPEM -text -noout
+			
+			Write-Host "VROPS Certificate Generation Process Completed" $VROPSCOMBINEDPEM -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+			
+			Write-Host "#######################################################################################################################" -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss") -ForegroundColor Green
+			Write-Host "Use the vROPs Combined PEM File to set your cert on vROPs. https://vrops.fqdn.here/admin" -ForegroundColor Green
+			Write-Host $VROPSCOMBINEDPEM -ForegroundColor Green
+			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss") -ForegroundColor Green
+			Write-Host "#######################################################################################################################" -ForegroundColor Green
+		}Else{
+		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
+		}
+	}Else{
+	Write-Error "CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script"
 	}
-	
-	#Copy CA Cert to Local Workstation
-	#Place your CA Cert to the VROPS folder
-	Write-Host "Copying CA PEM File to VROPS Cert folder"
-	Copy-Item $CAFILELOCATION $CACERT -ErrorAction SilentlyContinue
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	
-	#Create Full Chain vROPS PEM File
-	Write-Host "Create Full Chain vROPS PEM File"
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	$STEP1 = Get-Content $VROPSKEYPEM
-	$STEP2 = Get-Content $VROPSPEM 
-	$STEP3 = Get-Content $CACERT 
-	$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
-	$COMBINESTEPS | Set-Content $VROPSCOMBINEDPEM
-	Write-Host "VROPS Certificate Generation Process Completed" $VROPSCOMBINEDPEM -ForegroundColor Green
-	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-	Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 }
-
-Write-Host "Use the vROPs Combined PEM File to set your cert on vROPs. https://vrops.fqdn.here/admin"
-Write-Host $VROPSCOMBINEDPEM
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
@@ -255,5 +300,11 @@ Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 Stop-Transcript
 
-Write-Host "This script has completed its tasks"
-
+##Script Completed
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "Script Completed"
+Write-Host "Press Enter to close this PowerShell Script"
+PAUSE
+Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
+Write-Host "-----------------------------------------------------------------------------------------------------------------------"
