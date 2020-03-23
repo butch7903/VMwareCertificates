@@ -1,11 +1,33 @@
+<#
+    .NOTES
+	===========================================================================
+	Created by:		Russell Hamker
+	Date:			March 23, 2020
+	Version:		3.0
+	Twitter:		@butch7903
+	GitHub:			https://github.com/butch7903
+	===========================================================================
+
+	.SYNOPSIS
+		This script automates the generation of certificates from the Certificate Authorities Installed on your Windows PC and then combines the files for a certificate chain for later use.
+
+	.DESCRIPTION
+		Use this script to build the certificate structure. Fill in the variables and then simply run this script to
+		automate the process of exporting the certificates.
+
+	.NOTES
+		
+#>
+
 #Customizable Variables
-$Domain = "hamker" #Note: Example Domain hamker.local is represented as hamker. DO NOT Use the FQDN of your domain. If you wish to target only a subdomain, use the subdomain in this variable
+$ROOTMATCH = "US Courts" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
+$INTEREDIATEMATCH = "US Courts" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
 $OpenSSLLocation = "C:\Program Files\OpenSSL-Win64\bin" #x64 Version
 
 #Standard Variables
 $DATE = Get-date #Todays Date. Used to verify a CA Certicate is still valid
-$RootCerts = get-childitem -path Cert:\LocalMachine\Root | Sort Subject | Where {$_.Subject -match $Domain -and $_.NotAfter -gt $DATE}
-$InterCerts = get-childitem -path Cert:\LocalMachine\CA | Sort Subject | Where {$_.Subject -match $Domain -and $_.NotAfter -gt $DATE}
+$RootCerts = get-childitem -path Cert:\LocalMachine\Root | Sort Subject | Where {$_.Subject -match $ROOTMATCH -and $_.NotAfter -gt $DATE}
+$InterCerts = get-childitem -path Cert:\LocalMachine\CA | Sort Subject | Where {$_.Subject -match $INTEREDIATEMATCH -and $_.NotAfter -gt $DATE}
 
 ###Test if OpenSSL is Installed
 ##Specify OpenSSL version. If you have a 64-bit OS, use the x64 version. If you have a 32-bit OS, use the x86 version
