@@ -260,8 +260,10 @@ IF($OPENSSL)
 			#Create Full Chain vROPS PEM File
 			Write-Host "Create Full Chain vROPS PEM File"
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
-			$STEP1 = Get-Content $VROPSKEYPEM
-			$STEP2 = Get-Content $VROPSPEM 
+			#Reference https://kb.vmware.com/s/article/2046591
+			#Reference 2 https://docs.vmware.com/en/vRealize-Operations-Manager/8.0/com.vmware.vcom.core.doc/GUID-D476DD8F-0CCA-460D-BE94-9AC3F677B1EA.html
+			$STEP1 = Get-Content $VROPSPEM
+			$STEP2 = Get-Content $VROPSKEY
 			$STEP3 = Get-Content $CACERT 
 			$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
 			$COMBINESTEPS | Set-Content $VROPSCOMBINEDPEM
