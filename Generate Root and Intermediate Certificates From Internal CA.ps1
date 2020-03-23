@@ -20,8 +20,8 @@
 #>
 
 #Customizable Variables
-$ROOTMATCH = "US Courts" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
-$INTEREDIATEMATCH = "US Courts" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
+$ROOTMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
+$INTEREDIATEMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
 $OpenSSLLocation = "C:\Program Files\OpenSSL-Win64\bin" #x64 Version
 
 #Standard Variables
