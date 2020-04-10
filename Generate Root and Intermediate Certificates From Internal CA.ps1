@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			March 23, 2020
-	Version:		3.0
+	Date:			April 10, 2020
+	Version:		4.0
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -22,6 +22,7 @@
 #Customizable Variables
 $ROOTMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
 $INTERMEDIATEMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
+$SSLOUTPUTDIRECTORY = "C:\Certs" #This is the directory where you want the exported certificates to placed
 $OpenSSLLocation = "C:\Program Files\OpenSSL-Win64\bin" #x64 Version
 
 #Standard Variables
@@ -52,18 +53,18 @@ IF(!$OPENSSL)
 IF($OPENSSL)
 {
 	#Make Folders to store Certs in
-	New-item -Path C:\certs -Type Directory -ErrorAction SilentlyContinue
-	New-item -Path C:\certs\CAs -Type Directory -ErrorAction SilentlyContinue
-	New-item -Path C:\certs\CAs\Root -Type Directory -ErrorAction SilentlyContinue
-	New-item -Path C:\certs\CAs\Intermediate -Type Directory -ErrorAction SilentlyContinue
-	New-item -Path C:\certs\CAs\Combined -Type Directory -ErrorAction SilentlyContinue
+	New-item -Path $SSLOUTPUTDIRECTORY -Type Directory -ErrorAction SilentlyContinue
+	New-item -Path $SSLOUTPUTDIRECTORY\CAs -Type Directory -ErrorAction SilentlyContinue
+	New-item -Path $SSLOUTPUTDIRECTORY\CAs\Root -Type Directory -ErrorAction SilentlyContinue
+	New-item -Path $SSLOUTPUTDIRECTORY\CAs\Intermediate -Type Directory -ErrorAction SilentlyContinue
+	New-item -Path $SSLOUTPUTDIRECTORY\CAs\Combined -Type Directory -ErrorAction SilentlyContinue
 
 	##Save Root Certs to Root Folder
 	ForEach($Cert in $RootCerts) 
 	{
 		$CertPath = “cert:\LocalMachine\Root\”+$Cert.Thumbprint
 		$CertDNSName = $cert.DNSNameList.unicode
-		$CertFilePath = “c:\certs\CAs\Root\$CertDNSName-DER.cer”
+		$CertFilePath = “$SSLOUTPUTDIRECTORY\CAs\Root\$CertDNSName-DER.cer”
 		Export-Certificate -Cert $CertPath -FilePath $CertFilePath -Type CERT
 	}
 	$Cert=$null
@@ -73,12 +74,12 @@ IF($OPENSSL)
 	{
 		$CertPath = “cert:\LocalMachine\CA\”+$Cert.Thumbprint
 		$CertDNSName = $cert.DNSNameList.unicode
-		$CertFilePath = “c:\certs\CAs\Intermediate\$CertDNSName-DER.cer”
+		$CertFilePath = “$SSLOUTPUTDIRECTORY\CAs\Intermediate\$CertDNSName-DER.cer”
 		Export-Certificate -Cert $CertPath -FilePath $CertFilePath -Type CERT
 	}
-	$RootCertFolder = “c:\certs\CAs\Root\”
+	$RootCertFolder = “$SSLOUTPUTDIRECTORY\CAs\Root\”
 	$RootCertFolderContents = Get-ChildItem -Path $RootCertFolder
-	$InterCertFolder = “c:\certs\CAs\Intermediate\”
+	$InterCertFolder = “$SSLOUTPUTDIRECTORY\CAs\Intermediate\”
 	$InterCertFolderContents = Get-ChildItem -Path $InterCertFolder
 	cd $OpenSSLLocation
 	
@@ -107,30 +108,30 @@ IF($OPENSSL)
 	}
 	
 	##Make Combined Root/Intermediate Cert PEM File
-	ForEach($FILE in $InterList)
+	ForEach($InterCertFile in $InterList)
 	{
 		$Answer = Compare-Object -ReferenceObject $(Get-Content $RootList) -DifferenceObject $(Get-Content $InterList)
 		If(!$Answer)
 		{
 			Write-Host 'Only 1 internal CA in the PKI environment'
-			$NUM = $File.LastIndexOf('\')
+			$NUM = $INTERCERTFILE.LastIndexOf('\')
 			$NUM = $NUM + 1
-			$FILENAME = $FILE.SubString($NUM)
-			$FILENAME = $FILENAME.trim(".pem")
-			IF($FILENAME.Contains("\"))
+			$INTERCERTFILENAME = $INTERCERTFILE.SubString($NUM)
+			$INTERCERTFILENAME = $INTERCERTFILENAME.trim(".pem")
+			IF($INTERCERTFILENAME.Contains("\"))
 			{
-				$SUBFILENAME = Split-Path -Path $FILENAME -Leaf
-				Copy-item $InterList –Destination “c:\certs\CAs\Combined\CombinedCA_$SUBFILENAME.pem”
+				$SUBFILENAME = Split-Path -Path $INTERCERTFILENAME -Leaf
+				Copy-item $InterList –Destination “$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$SUBFILENAME.pem”
 			}Else{
-				Copy-item $InterList –Destination “c:\certs\CAs\Combined\CombinedCA_$FILENAME.pem”
+				Copy-item $InterList –Destination “$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$INTERCERTFILENAME.pem”
 			}
 			Write-Host 'CA File generated for VIC and VCH Usage at:'
-			Write-Host "c:\certs\CAs\Combined\CombinedCA_$FILENAME.pem" -ForegroundColor Green
+			Write-Host "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$INTERCERTFILENAME.pem" -ForegroundColor Green
 		}
 		If($Answer)
 		{
 			Write-Host 'Certificate Chain has been implemented, Attempting to create Combined CA file(s)'
-			$O  = .\openssl x509 -noout -subject -issuer -in $FILE
+			$O  = .\openssl x509 -noout -subject -issuer -in $INTERCERTFILE
 			$0 = $O[0]
 			$0 = $0 -creplace '(?s)^.*= ', ''
 			$1 = $O[1]
@@ -138,34 +139,32 @@ IF($OPENSSL)
 			$Compare = Compare-Object -ReferenceObject $0 -DifferenceObject $1
 			IF(!$Compare)
 			{
-				$FILENAME = $FILE.SubString($NUM)
-				$FILENAME = $FILENAME.trim(".pem")
-				IF($FILENAME.Contains("\"))
+				$INTERCERTFILENAME = $INTERCERTFILE.SubString($NUM)
+				$INTERCERTFILENAME = $INTERCERTFILENAME.trim(".pem")
+				IF($INTERCERTFILENAME.Contains("\"))
 				{
-					$SUBFILENAME = Split-Path -Path $FILENAME -Leaf
-					Copy-item $InterList –Destination “c:\certs\CAs\Combined\CombinedCA_$SUBFILENAME.pem”
+					$SUBFILENAME = Split-Path -Path $INTERCERTFILENAME -Leaf
+					Copy-item $InterList –Destination “$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$SUBFILENAME.pem”
 				}Else{
-					Copy-item $InterList –Destination “c:\certs\CAs\Combined\CombinedCA_$FILENAME.pem”
+					Copy-item $InterList –Destination “$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$INTERCERTFILENAME.pem”
 				}
 				Write-Host 'Only 1 internal CA in the PKI environment'
 				Write-Host 'CA File generated for VIC and VCH Usage at:'
-				Write-Host "c:\certs\CAs\Combined\CombinedCA_$FILENAME.pem" -ForegroundColor Green
+				Write-Host "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$INTERCERTFILENAME.pem" -ForegroundColor Green
 			}
 			IF($Compare)
 			{
 				Write-Host 'Intermediate CA has a Root CA'
 				$RootCA = $1.Split(‘.’)[0]
-				$RootCertFile = (Get-ChildItem -Path “c:\certs\CAs\Root” | Where {$_.fullname -match $RootCA-and $_.Extension -eq ".pem"} ).FullName
-				$RootCertFileContent = Get-Content $RootCertFile
-				$InterCertFileContent = Get-Content $File
+				$ROOTCERTFILE = (Get-ChildItem -Path “$SSLOUTPUTDIRECTORY\CAs\Root” | Where {$_.fullname -match $RootCA-and $_.Extension -eq ".pem"} ).FullName
+				$STEP1 = Get-Content $INTERCERTFILE
+				$STEP2 = Get-Content $ROOTCERTFILE
 				Write-Host “Combining Intermediate and Root PEM Files into single joined File”
-				$InterCertFileContent  | Out-File -FilePath “c:\certs\CAs\Combined\CombinedCA_$0.pem” -Append
-				$RootCertFileContent | Out-File -FilePath “c:\certs\CAs\Combined\CombinedCA_$0.pem” -Append
+				$COMBINESTEPS = $STEP1 + $STEP2 #+ $STEP3
+				$COMBINESTEPS | Set-Content "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$0.pem"
 				Write-Host 'CA File generated for VIC and VCH Usage at:'
-				Write-Host "c:\certs\CAs\Combined\CombinedCA_$0.pem" -ForegroundColor Green
-
+				Write-Host "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$0.pem" -ForegroundColor Green
 			}
-			#Copy-item $InterList –Destination “c:\certs\CAs\Combined\CombinedCA.pem”
 		}
 	}
 }
