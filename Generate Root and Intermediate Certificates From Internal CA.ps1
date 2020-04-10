@@ -160,7 +160,7 @@ IF($OPENSSL)
 				$STEP1 = Get-Content $INTERCERTFILE
 				$STEP2 = Get-Content $ROOTCERTFILE
 				Write-Host “Combining Intermediate and Root PEM Files into single joined File”
-				$COMBINESTEPS = $STEP1 + $STEP2 #+ $STEP3
+				$COMBINESTEPS = $STEP1 + $STEP2
 				$COMBINESTEPS | Set-Content "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$0.pem"
 				Write-Host 'CA File generated for VIC and VCH Usage at:'
 				Write-Host "$SSLOUTPUTDIRECTORY\CAs\Combined\CombinedCA_$0.pem" -ForegroundColor Green
