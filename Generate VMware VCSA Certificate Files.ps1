@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			February 12, 2020
-	Version:		1.0
+	Date:			April 10, 2020
+	Version:		1.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -274,22 +274,33 @@ IF($OPENSSL)
 			Write-Host "Reading Combined PEM file to verify configuration of file:" -ForegroundColor Green
 			.\openssl x509 -in $VCSACOMBINEDPEM -text -noout
 			
+			#Verify Certificate Files
+			Write-Host "Displaying Certificate Issuer Chain"
+			./openssl crl2pkcs7 -nocrl -certfile $VCSAPEM | ./openssl pkcs7 -print_certs -noout
+			Write-Host "Displaying MD5 of the $VCSAPEM"
+			$VCSAPEMMD5 = ./openssl x509 -modulus -noout -in $VCSAPEM | ./openssl md5
+			$VCSAPEMMD5 = $VCSAPEMMD5.replace("(stdin)= ","")
+			Write-Host $VCSAPEMMD5
+			Write-Host "Displaying MD5 of the $VCSAKEYPEM"
+			$VCSAKEYPEMMD5 = ./openssl rsa -modulus -noout -in $VCSAKEYPEM | ./openssl md5
+			$VCSAKEYPEMMD5 = $VCSAKEYPEMMD5.replace("(stdin)= ","")
+			Write-Host $VCSAKEYPEMMD5
+			If($VCSAPEMMD5 -eq $VCSAKEYPEMMD5)
+			{
+				Write-Host "MD5s Match for VCSAPEM and VCSAKEYPEM" -foreground green
+			}Else{
+				Write-Error "MD5 DO NOT MATCH FOR VCSAPEM and VCSAKEYPEM"
+			}
+			
 			Write-Host "VCSA Certificate Generation Process Completed" $VCSACOMBINEDPEM -ForegroundColor Green
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
-		}Else{
-		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
-		}
-	}Else{
-	Write-Error "CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script"
-	}
-}
-
-Write-Host "Use this file to install the Cert on your VCSA" $VCSACOMBINEDPEM -ForegroundColor Green
-Write-Host "Use this file to install the Key on your VCSA" $VCSAKEYPEM -ForegroundColor Green
-Write-Host "Use this file to install the CA cert on your VCSA" $CACERT -ForegroundColor Green
-Write-Host "Directions:"
-Write-Host "
+			Write-Host "Use this file to install the Cert on your VCSA" $VCSACOMBINEDPEM -ForegroundColor Green
+			Write-Host "Use this file to install the Key on your VCSA" $VCSAKEYPEM -ForegroundColor Green
+			Write-Host "Use this file to install the CA cert on your VCSA" $CACERT -ForegroundColor Green
+			Write-Host "#######################################################################################################################"
+			Write-Host "Directions:"
+			Write-Host "
 SSH to your VCSA using the root login
 
 #Create a \certs folder
@@ -305,32 +316,32 @@ cd /
 ./usr/lib/vmware-vmca/bin/certificate-manager
 
 #An Option box like Below will Appear:
-                 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-                |                                                                     |
-                |      *** Welcome to the vSphere 6.7 Certificate Manager  ***        |
-                |                                                                     |
-                |                   -- Select Operation --                            |
-                |                                                                     |
-                |      1. Replace Machine SSL certificate with Custom Certificate     |
-                |                                                                     |
-                |      2. Replace VMCA Root certificate with Custom Signing           |
-                |         Certificate and replace all Certificates                    |
-                |                                                                     |
-                |      3. Replace Machine SSL certificate with VMCA Certificate       |
-                |                                                                     |
-                |      4. Regenerate a new VMCA Root Certificate and                  |
-                |         replace all certificates                                    |
-                |                                                                     |
-                |      5. Replace Solution user certificates with                     |
-                |         Custom Certificate                                          |
-                |                                                                     |
-                |      6. Replace Solution user certificates with VMCA certificates   |
-                |                                                                     |
-                |      7. Revert last performed operation by re-publishing old        |
-                |         certificates                                                |
-                |                                                                     |
-                |      8. Reset all Certificates                                      |
-                |_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+				 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+				|                                                                     |
+				|      *** Welcome to the vSphere 6.7 Certificate Manager  ***        |
+				|                                                                     |
+				|                   -- Select Operation --                            |
+				|                                                                     |
+				|      1. Replace Machine SSL certificate with Custom Certificate     |
+				|                                                                     |
+				|      2. Replace VMCA Root certificate with Custom Signing           |
+				|         Certificate and replace all Certificates                    |
+				|                                                                     |
+				|      3. Replace Machine SSL certificate with VMCA Certificate       |
+				|                                                                     |
+				|      4. Regenerate a new VMCA Root Certificate and                  |
+				|         replace all certificates                                    |
+				|                                                                     |
+				|      5. Replace Solution user certificates with                     |
+				|         Custom Certificate                                          |
+				|                                                                     |
+				|      6. Replace Solution user certificates with VMCA certificates   |
+				|                                                                     |
+				|      7. Revert last performed operation by re-publishing old        |
+				|         certificates                                                |
+				|                                                                     |
+				|      8. Reset all Certificates                                      |
+				|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
 
 #Select Option 1
 #1. Replace Machine SSL certificate with Custom Certificate
@@ -350,9 +361,9 @@ administrator@vsphere.local
 Please provide valid SSO and VC privileged user credential to perform certificate operations.
 Enter username [Administrator@vsphere.local]:
 Enter password:
-         1. Generate Certificate Signing Request(s) and Key(s) for Machine SSL certificate
+		 1. Generate Certificate Signing Request(s) and Key(s) for Machine SSL certificate
 
-         2. Import custom certificate(s) and key(s) to replace existing Machine SSL certificate
+		 2. Import custom certificate(s) and key(s) to replace existing Machine SSL certificate
 
 Option [1 or 2]:
 
@@ -452,6 +463,14 @@ https://$VCSAFQDN:5480/login
 #vRA
 	#Depends upon version, find VCSA, test connection, accept new certificate
 "
+			Write-Host "#######################################################################################################################"
+		}Else{
+		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
+		}
+	}Else{
+	Write-Error "CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script"
+	}
+}
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
