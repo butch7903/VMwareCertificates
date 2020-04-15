@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			April 10, 2020
-	Version:		1.1
+	Date:			April 15, 2020
+	Version:		1.2
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -291,7 +291,17 @@ IF($OPENSSL)
 			}Else{
 				Write-Error "MD5 DO NOT MATCH FOR VCSAPEM and VCSAKEYPEM"
 			}
-			
+			Write-Host "  "
+			Write-Host "Getting Certificate SHA-1 Thumbprint"
+			$THUMBPRINTSHA1 = ./openssl x509 -noout -fingerprint -sha1 -inform pem -in $VCSAPEM
+			$THUMBPRINTSHA1 = $THUMBPRINTSHA1.replace("SHA1 Fingerprint=","")
+			Write-Host $THUMBPRINTSHA1
+			Write-Host "  "
+			Write-Host "Getting Certificate SHA-256 Thumbprint (Needed for NSX-T)"
+			$THUMBPRINTSHA256 = ./openssl x509 -noout -fingerprint -sha256 -inform pem -in $VCSAPEM
+			$THUMBPRINTSHA256 = $THUMBPRINTSHA256.replace("SHA256 Fingerprint=","")
+			Write-Host $THUMBPRINTSHA256
+			Write-Host "  "
 			Write-Host "VCSA Certificate Generation Process Completed" $VCSACOMBINEDPEM -ForegroundColor Green
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
@@ -446,7 +456,8 @@ https://$VCSAFQDN:5480/login
 	#Depends on version
 	#Click on System>Fabric>Computer Managers
 	#Select VCSA and click on Edit
-	#Update SHA-256 Thumbprint with updated thumbprint from new VCSA certificate
+	#Update SHA-256 Thumbprint with updated thumbprint from new VCSA certificate (below)
+	$THUMBPRINTSHA256
 	#Click Save
 #vROPs
 	#Delete old VCSA certificate from Administration>Management>Certificates
