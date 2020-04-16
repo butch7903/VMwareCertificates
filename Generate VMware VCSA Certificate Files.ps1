@@ -114,6 +114,9 @@ IF($OPENSSL)
 	req_extensions = v3_req
 
 	[ v3_req ]
+	basicConstraints = CA:false
+	keyUsage = keyEncipherment, digitalSignature, keyAgreement, nonRepudiation
+	extendedKeyUsage = serverAuth, clientAuth
 	subjectAltName = @alt_names
 	subjectKeyIdentifier = hash
 
