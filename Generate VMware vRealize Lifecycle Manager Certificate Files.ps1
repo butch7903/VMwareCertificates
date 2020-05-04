@@ -281,10 +281,10 @@ IF($OPENSSL)
 			Write-Host "Type in a Valid unique Name"
 			Write-Host "Copy the text contents of the below file to the Private Key area: "
 			Write-Host "$vRLCMKEYPEM"
-			Write-Host (Get-Content $vRLCMKEYPEM)
+			#Write-Host (Get-Content $vRLCMKEYPEM)
 			Write-Host "Copy the text contents of the below file to the Certificate Chain area:"
 			Write-Host "$vRLCMCOMBINEDPEM"
-			Write-Host (Get-Content $vRLCMCOMBINEDPEM)
+			#Write-Host (Get-Content $vRLCMCOMBINEDPEM)
 			Write-Host " "
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
