@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			February 4, 2020
-	Version:		1.0
+	Date:			May 7, 2020
+	Version:		2.0
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -22,7 +22,7 @@
 #>
 
 ##IdentityManager Certicate Customizable Variables
-$IdentityManagerNAME = "vidm01" #Short name for your IdentityManagerA (not FQDN)
+$IdentityManagerNAME = "vidm" #Short name for your IdentityManager VIP or single node (not FQDN)
 $IdentityManagerIP = "192.168.1.28" #Example 10.27.1.12 #Note you may want to specify all IPs for your Identity Manager cluster other than your VIP IP here.
 $IdentityManagerDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
@@ -36,11 +36,17 @@ $DEPARTMENT = "IT" #Your Department
 $EMAILADDRESS = "YourDepartmentEmail@here.com" #Department Email								  
 $CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
+$IdentityManagerDNS1 = "vidm01.hamker.local" #Node 1 FQDN 	#Note, Clear the info in the "" if you are only doing a single node
+$IdentityManagerIP1 = "192.168.1.181" #Node 1 IP 			#Note, Clear the info in the "" if you are only doing a single node
+$IdentityManagerDNS2 = "vidm02.hamker.local" #Node 2 FQDN 	#Note, Clear the info in the "" if you are only doing a single node
+$IdentityManagerIP2 = "192.168.1.182" #Node 2 IP 			#Note, Clear the info in the "" if you are only doing a single node
+$IdentityManagerDNS3 = "vidm03.hamker.local" #Node 3 FQDN 	#Note, Clear the info in the "" if you are only doing a single node
+$IdentityManagerIP3 = "192.168.1.183" #Node 3 IP 			#Note, Clear the info in the "" if you are only doing a single node
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$IdentityManagerCertLocationGet = Get-Item "$CERTLOCATION\IdentityManager" -ErrorAction SilentlyContinue
-$IdentityManagerCertLocation = "$CERTLOCATION\IdentityManager"
+$IdentityManagerCertLocationGet = Get-Item "$CERTLOCATION\vIDM\$IdentityManagerFQDN" -ErrorAction SilentlyContinue
+$IdentityManagerCertLocation = "$CERTLOCATION\vIDM\$IdentityManagerFQDN"
 $IdentityManagerKEYGET = Get-Item "$IdentityManagerCertLocation\$IdentityManagerNAME.key" -ErrorAction SilentlyContinue
 $IdentityManagerKEY = "$IdentityManagerCertLocation\$IdentityManagerNAME.key" # This is in RSA format
 $IdentityManagerKEYPEMGET = Get-Item "$IdentityManagerCertLocation\$IdentityManagerNAME-key.pem" -ErrorAction SilentlyContinue
@@ -112,13 +118,21 @@ IF($OPENSSL)
 
 	[ v3_req ]
 	basicConstraints = CA:false
-	keyUsage = keyEncipherment, digitalSignature, keyAgreement
+	keyUsage = keyEncipherment, digitalSignature, keyAgreement, nonRepudiation
 	extendedKeyUsage = serverAuth, clientAuth
 	subjectAltName = @alt_names
+	subjectKeyIdentifier = hash
 
 	[ alt_names ]
+	email = $EMAILADDRESS
 	DNS.1 = $IdentityManagerFQDN
 	IP.1 = $IdentityManagerIP
+	DNS.2 = $IdentityManagerDNS1
+	IP.2 = $IdentityManagerIP1
+	DNS.3 = $IdentityManagerDNS2
+	IP.3 = $IdentityManagerIP2
+	DNS.4 = $IdentityManagerDNS3
+	IP.4 = $IdentityManagerIP3
 
 	[ req_distinguished_name ]
 	C=$COUNTRY
@@ -273,19 +287,23 @@ IF($OPENSSL)
 			.\openssl x509 -in $IdentityManagerCOMBINEDPEM -text -noout
 			
 			Write-Host "IdentityManager Certificate Generation Process Completed" $IdentityManagerCOMBINEDPEM -ForegroundColor Green
+			Write-Host " "
+			Write-Host "Use this file to install the cert on your Identity Manager Cluster" $IdentityManagerCOMBINEDPEM -ForegroundColor Green
+			Write-Host "Use this file to install the RSA Key on your Identity Manager Cluster" $IdentityManagerKEY -ForegroundColor Green
+			Write-Host "Note: If you are using a Load Balancer, Install the certs on the individual nodes prior."
+			Write-Host " "
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 			Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 		}Else{
 		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
 		}
 	}Else{
-	Write-Error "CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script"
+	Write-Error "`
+CER File was not created. Please troubleshoot request process or manually place CER file in folder and rerun script.`
+File name must be:`
+$IdentityManagerCertLocation\$IdentityManagerNAME.cer"
 	}
 }
-
-Write-Host "Use this file to install the cert on your Identity Manager Cluster" $IdentityManagerCOMBINEDPEM -ForegroundColor Green
-Write-Host "Use this file to install the RSA Key on your Identity Manager Cluster" $IdentityManagerKEY -ForegroundColor Green
-Write-Host "Note: Only install Certificate on Identity Manager Directly if you are not using a load balancer"
 
 ##Stopping Logging
 #Note: Must stop transcriptting prior to sending email report with attached log file
