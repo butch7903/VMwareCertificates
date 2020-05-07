@@ -39,7 +39,7 @@ $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you 
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
-$vRLCMCertLocationGet = Get-Item "$CERTLOCATION\vRLCM\$vRLCMFQDN" -ErrorAction SilentlyContinue
+$vRLCMCertLocationGet = Get-Item "$CERTLOCATION\vRSLCM\$vRLCMFQDN" -ErrorAction SilentlyContinue
 $vRLCMCertLocation = "$CERTLOCATION\vRLCM\$vRLCMFQDN"
 $vRLCMKEYGET = Get-Item "$vRLCMCertLocation\$vRLCMNAME.key" -ErrorAction SilentlyContinue
 $vRLCMKEY = "$vRLCMCertLocation\$vRLCMNAME.key" # This is in RSA format
