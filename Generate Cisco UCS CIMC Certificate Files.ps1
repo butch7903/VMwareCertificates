@@ -22,12 +22,13 @@
 #>
 
 ##CIMC Certicate Customizable Variables
-$CERTLOCATION = "C:\Certs"		#Location where you want to create your certificates		  
+$CERTLOCATION = "C:\Certs" #Location where you want to create your certificates		  
 $CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Cisco6.0WebServer
 
 #Standard Variables
+Write-Host "You must first create the CSR request from the Cisco UCS CIMC and download the CSR file to your PC"
 $CIMCFQDN = Read-Host "Provide the FQDN for your Cisco UCS CIMC"
 $CIMCFQDN = $CIMCFQDN.ToLower() #CIMCNAME Should be lower case	
 $CIMCCertLocationGet = Get-Item "$CERTLOCATION\CIMC\$CIMCFQDN" -ErrorAction SilentlyContinue
