@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			April 15, 2020
-	Version:		1.2
+	Date:			August 4, 2020
+	Version:		1.2.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -313,7 +313,7 @@ IF($OPENSSL)
 			Write-Host "Use this file to install the CA cert on your VCSA" $CACERT -ForegroundColor Green
 			Write-Host "#######################################################################################################################"
 			Write-Host "Directions:"
-			Write-Host "
+			Write-Host @"
 SSH to your VCSA using the root login
 
 #Create a \certs folder
@@ -412,7 +412,7 @@ service-control --status --all
 https://$VCSAFQDN 
 
 #Update VMAMI Certificate
-#Now we need to update VAMI to match the new Cert
+#Now we need to update VAMI to match the new Cert(VCSA 6.0 - 6.7 only. This is fixed in 7.0)
 #VMware KB: https://kb.vmware.com/s/article/2136693 
 
 #Bring back up SSH to VCSA
@@ -435,7 +435,7 @@ vi /opt/vmware/etc/lighttpd/lighttpd.conf
 #Use the arrow key to move down to the blank area
 #Type the letter a (to append)
 #Paste in the below information:
-ssl.ca                     = "/etc/applmgmt/appliance/ca.crt"
+ssl.ca-file="/etc/applmgmt/appliance/ca.crt" #6.7 fix
 
 #Click on the ESC button
 #Type :wq (this will write and quit)
@@ -476,7 +476,7 @@ https://$VCSAFQDN:5480/login
 	#Depends upon version, find VCSA, test connection, accept new certificate
 #vRA
 	#Depends upon version, find VCSA, test connection, accept new certificate
-"
+"@
 			Write-Host "#######################################################################################################################"
 		}Else{
 		Write-Error "Multiple PEM Files found with similar name. Please delete CAs from CA folder that are no longer needed and rerun this script."
