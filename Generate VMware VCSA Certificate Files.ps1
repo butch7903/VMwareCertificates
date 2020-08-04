@@ -313,6 +313,7 @@ IF($OPENSSL)
 			Write-Host "Use this file to install the CA cert on your VCSA" $CACERT -ForegroundColor Green
 			Write-Host "#######################################################################################################################"
 			Write-Host "Directions:"
+			$VAMIURL = "https://$VCSAFQDN"+":5480/login"
 			Write-Host @"
 SSH to your VCSA using the root login
 
@@ -446,7 +447,7 @@ ssl.ca-file="/etc/applmgmt/appliance/ca.crt" #6.7 fix
 
 #Check the Certicate on your VAMI site, make sure it is good. 
 #You may need to close your browser and reopen it to see the updated certificate.
-https://$VCSAFQDN:5480/login
+$VAMIURL
 
 ##After VCSA certs have been checked
 #Fix Certs connecting to VCSA. This Includes:
