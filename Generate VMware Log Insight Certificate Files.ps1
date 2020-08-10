@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			March 19, 2020
-	Version:		2.1
+	Date:			August 10, 2020
+	Version:		2.2
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -22,7 +22,7 @@
 #>
 
 ##LogInsight Certicate Customizable Variables
-$LogInsightNAME = "loginsight" #Short name for your LogInsightA (not FQDN)
+$LogInsightNAME = "loginsight" #Short name for your LogInsight VIP (not FQDN)
 $LogInsightIP = "192.168.1.40" #Example 10.27.1.12 #Note you may want to specify all IPs for your Log Insight cluster other than your VIP IP here.
 $LogInsightDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
@@ -36,6 +36,17 @@ $DEPARTMENT = "IT" #Your Department
 $EMAILADDRESS = "YourDepartmentEmail@here.com" #Department Email								  
 $CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
+$LogInsightNodeNAME1 = "loginsight01.hamker.local" #FQDN of Node #1
+$LogInsightNodeIP1 = "192.168.1.41" #FQDN of Node #1
+#If you have a vRLI Cluster, uncomment the quantity of nodes below and fill in the FQDN
+#$LogInsightNodeNAME2 = "loginsight01.hamker.local" #FQDN of Node #1
+#$LogInsightNodeIP2 = "192.168.1.42" #FQDN of Node #1
+#$LogInsightNodeNAME3 = "loginsight01.hamker.local" #FQDN of Node #1
+#$LogInsightNodeIP3 = "192.168.1.43" #FQDN of Node #1
+#$LogInsightNodeNAME4 = "loginsight01.hamker.local" #FQDN of Node #1
+#$LogInsightNodeIP4 = "192.168.1.44" #FQDN of Node #1
+#$LogInsightNodeNAME5 = "loginsight01.hamker.local" #FQDN of Node #1
+#$LogInsightNodeIP5 = "192.168.1.45" #FQDN of Node #1
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
@@ -119,6 +130,8 @@ IF($OPENSSL)
 	[ alt_names ]
 	DNS.1 = $LogInsightFQDN
 	IP.1 = $LogInsightIP
+	DNS.2 = $LogInsightNodeNAME1
+	IP.2 = $LogInsightNodeIP1
 
 	[ req_distinguished_name ]
 	C=$COUNTRY
@@ -129,6 +142,129 @@ IF($OPENSSL)
 	CN=$LogInsightFQDN
 	emailAddress=$EMAILADDRESS
 	"
+	
+	If($LogInsightNodeNAME3)
+	{
+		$CNF = "[ req ]
+		default_md = sha512
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $LogInsightFQDN
+		IP.1 = $LogInsightIP
+		DNS.2 = $LogInsightNodeNAME1
+		IP.2 = $LogInsightNodeIP1
+		DNS.3 = $LogInsightNodeNAME2
+		IP.3 = $LogInsightNodeIP2
+		DNS.4 = $LogInsightNodeNAME3
+		IP.4 = $LogInsightNodeIP3
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$LogInsightFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+
+	If($LogInsightNodeNAME4)
+	{
+		$CNF = "[ req ]
+		default_md = sha512
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $LogInsightFQDN
+		IP.1 = $LogInsightIP
+		DNS.2 = $LogInsightNodeNAME1
+		IP.2 = $LogInsightNodeIP1
+		DNS.3 = $LogInsightNodeNAME2
+		IP.3 = $LogInsightNodeIP2
+		DNS.4 = $LogInsightNodeNAME3
+		IP.4 = $LogInsightNodeIP3
+		DNS.5 = $LogInsightNodeNAME4
+		IP.5 = $LogInsightNodeIP4
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$LogInsightFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($LogInsightNodeNAME5)
+	{
+		$CNF = "[ req ]
+		default_md = sha512
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $LogInsightFQDN
+		IP.1 = $LogInsightIP
+		DNS.2 = $LogInsightNodeNAME1
+		IP.2 = $LogInsightNodeIP1
+		DNS.3 = $LogInsightNodeNAME2
+		IP.3 = $LogInsightNodeIP2
+		DNS.4 = $LogInsightNodeNAME3
+		IP.4 = $LogInsightNodeIP3
+		DNS.5 = $LogInsightNodeNAME4
+		IP.5 = $LogInsightNodeIP4
+		DNS.6 = $LogInsightNodeNAME5
+		IP.6 = $LogInsightNodeIP5
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$LogInsightFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
 
 	#Open OpenSSL EXE Location
 	Write-Host "-----------------------------------------------------------------------------------------------------------------------"
