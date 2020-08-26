@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			March 20, 2020
-	Version:		2.0
+	Date:			August 26, 2020
+	Version:		2.1
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
@@ -15,14 +15,17 @@
 
 	.DESCRIPTION
 		Use this script to build the certificate structure. Fill in the variables and then simply run this script to
-		automate the process of deploying vSphere Integrated Containers.
+		automate the process of generating certificates. If you are not a CA Admin, you can run this script to generate your 
+		CSR and submit it to your CA Admin manually. After you have received the .cer file back from your CA Admin, simply drop it in
+		the folder with the VROPSNAME short name and run the script a second time to complete the certificate creation 
+		process for vROPs.
 
 	.NOTES
 		
 #>
 
 ##VROPS Certicate Customizable Variables
-$VROPSNAME = "vrops" #Short name for your vROPs node (not FQDN)
+$VROPSNAME = "vrops" #Short name for your vROPs node/vip. VIP should be primary if you are using a load balancer. (not FQDN)
 $VROPSIP = "192.168.1.55" #Example 10.27.1.12
 $VROPSDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
@@ -36,6 +39,23 @@ $DEPARTMENT = "IT" #Your Department
 $EMAILADDRESS = "YourDepartmentEmail@here.com" #Department Email								  
 $CAFILELOCATION = "C:\certs\CAs\Combined" #Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from #Example C:\Certs\CA\Combined\CombinedCA_HAMCA01-CA-PEM.pem
 $CERTIFICATESERVER = "hamca01.hamker.local" #FQDN of the Certificate server you are getting your certs from #Example HAMCA01.hamker.local
+##If you have a vROPs Cluster or multiple nodes, uncomment the quantity of nodes below and fill in the FQDNs/IPs
+#$VROPSNodeNAME1 = "vrops01.hamker.local" #FQDN of Node #1
+#$VROPSNodeIP1 = "192.168.1.42" #IP of Node #1
+#$VROPSNodeNAME2 = "vrops02.hamker.local" #FQDN of Node #2
+#$VROPSNodeIP2 = "192.168.1.43" #IP of Node #2
+#$VROPSNodeNAME3 = "vrops03.hamker.local" #FQDN of Node #3
+#$VROPSNodeIP3 = "192.168.1.44" #IP of Node #3
+#$VROPSNodeNAME4 = "vrops04.hamker.local" #FQDN of Node #4
+#$VROPSNodeIP4 = "192.168.1.45" #IP of Node #4
+#$VROPSNodeNAME5 = "vrops05.hamker.local" #FQDN of Node #5
+#$VROPSNodeIP5 = "192.168.1.46" #IP of Node #5
+#$VROPSNodeNAME6 = "vrops06.hamker.local" #FQDN of Node #6
+#$VROPSNodeIP6 = "192.168.1.47" #IP of Node #6
+#$VROPSNodeNAME7 = "vrops07.hamker.local" #FQDN of Node #7
+#$VROPSNodeIP7 = "192.168.1.48" #IP of Node #7
+#$VROPSNodeNAME8 = "vrops08.hamker.local" #FQDN of Node #8
+#$VROPSNodeIP8 = "192.168.1.49" #IP of Node #8
 
 #Standard Variables
 $CERTLOCATION = "C:\Certs"
@@ -129,7 +149,342 @@ IF($OPENSSL)
 	CN=$VROPSFQDN
 	emailAddress=$EMAILADDRESS
 	"
+	If($VROPSNodeNAME1)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
 
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME2)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME3)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME4)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+		DNS.5 = $VROPSNodeNAME4
+		IP.5 = $VROPSNodeIP4
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME5)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+		DNS.5 = $VROPSNodeNAME4
+		IP.5 = $VROPSNodeIP4
+		DNS.6 = $VROPSNodeNAME5
+		IP.6 = $VROPSNodeIP5
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME6)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+		DNS.5 = $VROPSNodeNAME4
+		IP.5 = $VROPSNodeIP4
+		DNS.6 = $VROPSNodeNAME5
+		IP.6 = $VROPSNodeIP5
+		DNS.7 = $VROPSNodeNAME6
+		IP.7 = $VROPSNodeIP6
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME7)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+		DNS.5 = $VROPSNodeNAME4
+		IP.5 = $VROPSNodeIP4
+		DNS.6 = $VROPSNodeNAME5
+		IP.6 = $VROPSNodeIP5
+		DNS.7 = $VROPSNodeNAME6
+		IP.7 = $VROPSNodeIP6
+		DNS.8 = $VROPSNodeNAME7
+		IP.8 = $VROPSNodeIP7
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
+	If($VROPSNodeNAME8)
+	{
+		$CNF = "[ req ]
+		default_md = sha256
+		default_bits = 2048
+		default_keyfile = key.key
+		distinguished_name = req_distinguished_name
+		encrypt_key = no
+		prompt = no
+		string_mask = nombstr
+		req_extensions = v3_req
+
+		[ v3_req ]
+		basicConstraints = CA:false
+		keyUsage = keyEncipherment, digitalSignature, keyAgreement
+		extendedKeyUsage = serverAuth, clientAuth
+		subjectAltName = @alt_names
+
+		[ alt_names ]
+		DNS.1 = $VROPSFQDN
+		IP.1 = $VROPSIP
+		DNS.2 = $VROPSNodeNAME1
+		IP.2 = $VROPSNodeIP1
+		DNS.3 = $VROPSNodeNAME2
+		IP.3 = $VROPSNodeIP2
+		DNS.4 = $VROPSNodeNAME3
+		IP.4 = $VROPSNodeIP3
+		DNS.5 = $VROPSNodeNAME4
+		IP.5 = $VROPSNodeIP4
+		DNS.6 = $VROPSNodeNAME5
+		IP.6 = $VROPSNodeIP5
+		DNS.7 = $VROPSNodeNAME6
+		IP.7 = $VROPSNodeIP6
+		DNS.8 = $VROPSNodeNAME7
+		IP.8 = $VROPSNodeIP7
+		DNS.9 = $VROPSNodeNAME8
+		IP.9 = $VROPSNodeIP8
+
+		[ req_distinguished_name ]
+		C=$COUNTRY
+		ST=$STATE
+		L=$CITY
+		O=$COMPANY
+		OU=$DEPARTMENT
+		CN=$VROPSFQDN
+		emailAddress=$EMAILADDRESS
+		"
+	}
+	
 	#Open OpenSSL EXE Location
 	Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
