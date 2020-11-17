@@ -14,8 +14,8 @@
 		the PS1 file.
 
 	.DESCRIPTION
-		Use this script to build the certificate structure. Fill in the variables and then simply run this script to
-		automate the process of deploying vSphere Integrated Containers.
+		Use this script to build the certificate. Fill in the variables and then simply run this script to
+		automate the process of generating the certificate.
 
 	.NOTES
 		This scripts CSR Template was reverse engineered from a 6.7 VCSA created CSR. I added the email address to it
