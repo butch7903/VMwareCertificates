@@ -61,7 +61,8 @@ $CERTLOCATION = "C:\Certs"
 $vRNICertLocationGet = Get-Item "$CERTLOCATION\vRNI\$vRNIFQDN" -ErrorAction SilentlyContinue
 $vRNICertLocation = "$CERTLOCATION\vRNI\$vRNIFQDN"
 $vRNIKEYGET = Get-Item "$vRNICertLocation\$vRNINAME.key" -ErrorAction SilentlyContinue
-$vRNIKEY = "$vRNICertLocation\$vRNINAME.key" # This is in RSA format
+$vRNIKEYNAME = "$vRNINAME.key"
+$vRNIKEY = "$vRNICertLocation\$vRNIKEYNAME" # This is in RSA format
 $vRNIKEYPEMGET = Get-Item "$vRNICertLocation\$vRNINAME-key.pem" -ErrorAction SilentlyContinue
 $vRNIKEYPEMNAME = "$vRNINAME-key.pem"
 $vRNIKEYPEM = "$vRNICertLocation\$vRNIKEYPEMNAME" # This is in PEM format
@@ -71,7 +72,7 @@ $vRNICERGET = Get-Item "$vRNICertLocation\$vRNINAME.cer" -ErrorAction SilentlyCo
 $vRNICER = "$vRNICertLocation\$vRNINAME.cer" #This is in DER format
 $vRNIPEMGET = Get-Item "$vRNICertLocation\$vRNINAME.pem" -ErrorAction SilentlyContinue
 $vRNIPEM = "$vRNICertLocation\$vRNINAME.pem" # This is in PEM format
-$vRNICOMBINEDPEMNAME = "$vRNINAME-sslCertificateChain.pem"
+$vRNICOMBINEDPEMNAME = "$vRNINAME.crt"
 $vRNICOMBINEDPEM = "$vRNICertLocation\$vRNICOMBINEDPEMNAME" # This is in PEM format. This is the file you use to update vRNI with.
 
 #Certificate Variables
@@ -680,8 +681,9 @@ IF($OPENSSL)
 			Write-Host "Creating Full Chain vRNI PEM File" -ForegroundColor Green
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 			#$STEP1 = Get-Content $vRNIKEYPEM
-			$STEP1 = Get-Content $vRNIPEM 
-			$STEP2 = Get-Content $CACERT 
+			#$STEP1 = Get-Content $vRNIKEY
+			$STEP1 = Get-Content $vRNIPEM
+			$STEP2 = Get-Content $CACERT
 			$COMBINESTEPS = $STEP1 + $STEP2 #+ $STEP3
 			$COMBINESTEPS | Set-Content $vRNICOMBINEDPEM
 			
@@ -729,6 +731,9 @@ IF($OPENSSL)
 			Write-Host "Directions:"
 			Write-Host @"
 Follow these Steps to properly install your new certificate
+
+OPTION A
+########
 Based on KB https://kb.vmware.com/s/article/2148128
 
 1. Log in to vRealize Network Insight command line interface (CLI) via SSH as the user consoleuser.
@@ -745,7 +750,7 @@ custom-cert copy --host <IP_of_SFTP_host> --user <user_of_SFTP_host> --port 22 -
 custom-cert copy --host <IP_of_SFTP_host> --user <user_of_SFTP_host> --port 22 --path </path/to/file>.key
 Note: replace <IP_of_SFTP_host>, <user_of_SFTP_host>, and </path/to/file> with the real values. An example this command would be as below:
 custom-cert copy --host 10.1.1.1 --user adminxyz --port 22 --path /root/$vRNICOMBINEDPEMNAME
-custom-cert copy --host 10.1.1.1 --user adminxyz --port 22 --path /root/$vRNIKEYPEMNAME
+custom-cert copy --host 10.1.1.1 --user adminxyz --port 22 --path /root/$vRNIKEYNAME
  
 When you are prompted to enter the password, enter <user_of_SFTP_host> password.
 
@@ -768,6 +773,31 @@ After the certificate is applied, you see this message:
 
 Successfully applied new certificate. All active UI sessions have to be restarted.
 Note: Passphrase protected keypair is not supported.
+
+OPTION B
+########
+This is not documented, but fully supported (based on vRNI using ubuntu OS)
+
+1. Use WinSCP with the support user account to copy files below to each platform.
+/home/support/$vRNICOMBINEDPEMNAME
+/home/support/$vRNIKEYNAME
+
+2. SSH to a platform via support
+
+3. Run these commands 
+sudo mkdir -u ubuntu -p /home/ubuntu/custom_certs
+sudo cp /home/support/$vRNICOMBINEDPEMNAME /home/ubuntu/custom_certs
+sudo cp /home/support/$vRNIKEYNAME /home/ubuntu/custom_certs
+
+4. Change users to consoleuser 
+sudo su consoleuser
+
+5. List the Files
+custom-cert list
+#verify files are there
+
+6. Apply Cert
+custom-cert apply
 
 "@
 			Write-Host "#######################################################################################################################"
