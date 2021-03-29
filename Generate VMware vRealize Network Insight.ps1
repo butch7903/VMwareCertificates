@@ -23,7 +23,7 @@
 
 ##vRNI Certicate Customizable Variables
 $vRNINAME = "hamvrni01" #Short name for your vRNI (not FQDN)
-$vRNIIP = "192.168.1.68" #Example 10.27.1.12
+$vRNIIP = "192.168.1.218" #Example 10.27.1.12
 $vRNIDOMAIN = "hamker.local"
 $CERTTEMPLATE = "CertificateTemplate:VMwareWebServer" #To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName #Example CertificateTemplate:Vmware6.0WebServer
 $vRNINAME = $vRNINAME.ToLower() #vRNINAME Should be lower case
