@@ -140,7 +140,7 @@ IF($OPENSSL)
 	Write-Host "-----------------------------------------------------------------------------------------------------------------------"
 	Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	Write-Host "Starting Certifacte Creation Process"
-	CD $OpenSSLLocation
+	Set-Location $OpenSSLLocation
 	
 	#Make new System Cert Folder for storing all the Cert files
 	IF(!$SYSCERTLOCATIONGET)
@@ -163,7 +163,7 @@ IF($OPENSSL)
 	IF(!$SYSKEYGET)
 	{
 		#Open OpenSSL EXE Location
-		CD $OpenSSLLocation
+		Set-Location $OpenSSLLocation
 		.\openssl genrsa -out $SYSKEY 2048
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}else {
@@ -176,7 +176,7 @@ IF($OPENSSL)
 		Write-Host "$SHORTNAME-key.pem file does not exist"
 		Write-Host "Generating $SHORTNAME-key.pem file"
 		#Open OpenSSL EXE Location
-		CD $OpenSSLLocation
+		Set-Location $OpenSSLLocation
 		.\openssl pkcs8 -topk8 -in $SYSKEY -outform PEM -nocrypt -out $SYSKEYPEM
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}else {
@@ -189,7 +189,7 @@ IF($OPENSSL)
 		Write-Host "$SHORTNAME CSR File Not Found"
 		Write-Host "Generating $SHORTNAME CSR"
 		#Open OpenSSL EXE Location
-		CD $OpenSSLLocation
+		Set-Location $OpenSSLLocation
 		.\openssl req -config $CFGFILEFULLNAME -new -key $SYSKEY -out $SYSCSR
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}else {
@@ -242,7 +242,7 @@ IF($OPENSSL)
 		IF(!$SYSPEMGET)
 		{
 			#Open OpenSSL EXE Location
-			CD $OpenSSLLocation
+			Set-Location $OpenSSLLocation
 			.\openssl x509 -in $SYSCER -outform PEM -out $SYSPEM
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 		}else {
@@ -253,7 +253,7 @@ IF($OPENSSL)
 		
 		#Finding Combined CA PEM File that matches issuing CA for CER
 		Write-Host "Finding CA PEM File CA:"$ISSUINGCASEL
-		$CAFILELIST = Get-ChildItem $CAFILELOCATION | where {$_.extension -eq ".pem" -and $_.name -match $ISSUINGCASEL}
+		$CAFILELIST = Get-ChildItem $CAFILELOCATION | Where-Object {$_.extension -eq ".pem" -and $_.name -match $ISSUINGCASEL}
 		
 		IF($CAFILELIST.count -eq 1)
 		{
@@ -273,7 +273,7 @@ IF($OPENSSL)
 			$COMBINESTEPS | Set-Content $SYSCOMBINEDPEM
 			
 			#Output name of pem full chain
-			CD $OpenSSLLocation
+			Set-Location $OpenSSLLocation
 			#openssl x509 -in certificate.crt -text -noout
 			Write-Host "Reading Combined PEM file to verify configuration of file:" -ForegroundColor Green
 			.\openssl x509 -in $SYSCOMBINEDPEM -text -noout
@@ -314,7 +314,6 @@ IF($OPENSSL)
 			Write-Host "Use this file to install the CA cert on your System" $CACERT -ForegroundColor Green
 			Write-Host "#######################################################################################################################"
 			Write-Host "Directions:"
-			$VAMIURL = "https://$SYSFQDN"+":5480/login"
 			Write-Host @"
 SSH to your system using the root login
 
