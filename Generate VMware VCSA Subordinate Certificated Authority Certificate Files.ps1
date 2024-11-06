@@ -9,17 +9,15 @@
 	===========================================================================
 
 	.SYNOPSIS
-		This script automates the generation of certificates for VMware VCSA (VMware vCenter Server Applaince). This includes generating all certificates
-		using a Windows CA and CA Template. You must open this script and change the variables to match your environment and then execute
-		the PS1 file.
+		This script automates the generation of certificates for VMware VCSA (VMware vCenter Server Applaince) to become a Subordinate CA.
+		This includes generating all certificates using a Windows CA and CA Template. You must open this script and change the variables 
+		to match your environment and then execute the PS1 file.
 
 	.DESCRIPTION
-		Use this script to build the certificate. Fill in the variables and then simply run this script to
-		automate the process of generating the certificate.
+		Use this script to build the certificate for the VCSA to become a subordindate CA. Fill in the variables and then simply run this
+		script to automate the process of generating the certificate.
 
-	.NOTES
-		This scripts CSR Template was reverse engineered from a 6.7 VCSA created CSR. I added the email address to it
-		to make it easier to see who requested the certificate.
+		This scripts CSR Template was reverse engineered from a 8.0 VCSA created CSR.
 #>
 
 ##VCSA Certicate Customizable Variables
