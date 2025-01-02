@@ -2,8 +2,8 @@
     .NOTES
 	===========================================================================
 	Created by:		Russell Hamker
-	Date:			November 5, 2024
-	Version:		1.2.1
+	Date:			Janunary 2, 2025
+	Version:		1.2.2
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
