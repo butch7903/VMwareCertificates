@@ -162,6 +162,10 @@ IF($OPENSSL)
 		#Open OpenSSL EXE Location
 		CD $OpenSSLLocation
 		.\openssl genrsa -out $VCSAKEY 4096
+
+		#Update output for Unix format
+		[IO.File]::WriteAllText("$VCSAKEY", ([IO.File]::ReadAllText("$VCSAKEY") -replace "`r`n","`n"))
+
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}else {
 		Write-Host "Key.key already generated at" $VCSAKEY -ForegroundColor Green
@@ -175,6 +179,8 @@ IF($OPENSSL)
 		#Open OpenSSL EXE Location
 		CD $OpenSSLLocation
 		.\openssl pkcs8 -topk8 -in $VCSAKEY -outform PEM -nocrypt -out $VCSAKEYPEM
+		#Update output for Unix format
+		[IO.File]::WriteAllText("$VCSAKEYPEM", ([IO.File]::ReadAllText("$VCSAKEYPEM") -replace "`r`n","`n"))
 		Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 	}else {
 		Write-Host "Key.pem already generated at" $VCSAKEYPEM -ForegroundColor Green
@@ -241,6 +247,10 @@ IF($OPENSSL)
 			#Open OpenSSL EXE Location
 			CD $OpenSSLLocation
 			.\openssl x509 -in $VCSACER -outform PEM -out $VCSAPEM
+
+			#Update output for Unix format
+			[IO.File]::WriteAllText("$VCSAPEM", ([IO.File]::ReadAllText("$VCSAPEM") -replace "`r`n","`n"))
+
 			Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 		}else {
 			Write-Host "Server.pem already generated at" $VCSAPEM -ForegroundColor Green
@@ -268,6 +278,9 @@ IF($OPENSSL)
 			$STEP2 = Get-Content $CACERT 
 			$COMBINESTEPS = $STEP1 + $STEP2 #+ $STEP3
 			$COMBINESTEPS | Set-Content $VCSACOMBINEDPEM
+
+			#Update output for Unix format
+			[IO.File]::WriteAllText("$VCSACOMBINEDPEM", ([IO.File]::ReadAllText("$VCSACOMBINEDPEM") -replace "`r`n","`n"))
 			
 			#Output name of pem full chain
 			CD $OpenSSLLocation
