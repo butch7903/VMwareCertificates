@@ -15,12 +15,14 @@
 	Use this script to build the certificate for your VMware Environment. Fill in the variables and then simply run this
 	script to automate the process of generating the certificate.
 
+	Note: Use this command to get list of templates: certutil -template | Select-String -Pattern TemplatePropCommonName
+
 	.EXAMPLE
 	#Example - VCF Installer
 	$Shortname = "vcfinstaller" # Short Name for FQDN
 	$IPAddress = "10.10.1.66" # IP Address of FQDN
 	$Domain = "hamker.local" # Domain FQDN
-	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName
+	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1
 	$CertType = "WebServer" # Pick from VCSA, Operations, WebServer, or SubordinateCA
 	$Country = "US" # 2 Letter Country Code
 	$State = "KS" # Your State
@@ -28,7 +30,7 @@
 	$Company = "Hamker Tech" # Your Company
 	$Department = "IT VMware Team" # Your Department
 	$EmailAddress = "YourGroupEmailAddressHere@me.com" # Department Email								  
-	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from
+	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files.
 	$CertificateServer = "hamca01.hamker.local" # FQDN of the Certificate server you are getting your certs from
 	./generate-certificate-files.ps1 `
 	-Shortname $Shortname `
@@ -50,7 +52,7 @@
 	$Shortname = "hamvc02" # Short Name for FQDN
 	$IPAddress = "192.168.1.66" # IP Address of FQDN
 	$Domain = "hamker.local" # Domain FQDN
-	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName
+	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1
 	$CertType = "VCSA" # Pick from VCSA, Operations, WebServer, or SubordinateCA
 	$Country = "US" # 2 Letter Country Code
 	$State = "KS" # Your State
@@ -58,7 +60,7 @@
 	$Company = "Hamker Tech" # Your Company
 	$Department = "IT VMware Team" # Your Department
 	$EmailAddress = "YourGroupEmailAddressHere@me.com" # Department Email								  
-	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from
+	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files.
 	$CertificateServer = "hamca01.hamker.local" # FQDN of the Certificate server you are getting your certs from
 	./generate-certificate-files.ps1 `
 	-Shortname $Shortname `
@@ -77,10 +79,10 @@
 
 	.EXAMPLE
 	#Example - VCSASubordinate CA Certificate
-	$Shortname = "hamvc02" # Short Name for FQDN
-	$IPAddress = "192.168.1.66" # IP Address of FQDN
+	$Shortname = "hamvc01" # Short Name for FQDN
+	$IPAddress = "10.10.1.65" # IP Address of FQDN
 	$Domain = "hamker.local" # Domain FQDN
-	$CertTemplate = "CertificateTemplate:SubCA" # To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName
+	$CertTemplate = "CertificateTemplate:SubCA" # To List the Certiicate Templates to get the right 1 
 	$CertType = "SubordinateCA" # Pick from VCSA, Operations, WebServer, or SubordinateCA
 	$Country = "US" # 2 Letter Country Code
 	$State = "KS" # Your State
@@ -88,7 +90,7 @@
 	$Company = "Hamker Tech" # Your Company
 	$Department = "IT VMware Team" # Your Department
 	$EmailAddress = "YourGroupEmailAddressHere@me.com" # Department Email								  
-	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from
+	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files.
 	$CertificateServer = "hamca01.hamker.local" # FQDN of the Certificate server you are getting your certs from
 	./generate-certificate-files.ps1 `
 	-Shortname $Shortname `
@@ -114,7 +116,7 @@
 	$Shortname3 = "vcfops3" # Short Name for Node 3 FQDN
 	$IPAddress3 = "192.168.1.163" # IP Address of Node 3 FQDN
 	$Domain = "hamker.local" # Domain FQDN
-	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1 #certutil -template | Select-String -Pattern TemplatePropCommonName
+	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1 
 	$CertType = "Operations" # Pick from VCSA, Operations, WebServer, or SubordinateCA
 	$Country = "US" # 2 Letter Country Code
 	$State = "KS" # Your State
@@ -122,7 +124,7 @@
 	$Company = "Hamker Tech" # Your Company
 	$Department = "IT VMware Team" # Your Department
 	$EmailAddress = "YourGroupEmailAddressHere@me.com" # Department Email								  
-	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files. Make sure you put your Combined CA PEM file somewhere it can be copied over easily from
+	$CAFolder = "C:\certs\CAs\Combined" # Folder location of combined CA Files.
 	$CertificateServer = "hamca01.hamker.local" # FQDN of the Certificate server you are getting your certs from
 	./generate-certificate-files.ps1 `
 	-Shortname $Shortname `
