@@ -18,8 +18,8 @@
 	Note: Use this command to get list of templates: certutil -template | Select-String -Pattern TemplatePropCommonName
 
 	.EXAMPLE
-	#Example - VCF Installer
-	$Shortname = "vcfinstaller" # Short Name for FQDN
+	#Example - SDDC Manager
+	$Shortname = "sddcmanager" # Short Name for FQDN
 	$IPAddress = "10.10.1.66" # IP Address of FQDN
 	$Domain = "hamker.local" # Domain FQDN
 	$CertTemplate = "CertificateTemplate:VMwareWebServer" # To List the Certiicate Templates to get the right 1
@@ -198,7 +198,8 @@ param(
 	[Parameter(Mandatory=$false)][string]$Shortname19,
 	[Parameter(Mandatory=$false)][string]$IPAddress19,
 	[Parameter(Mandatory=$false)][string]$Shortname20,
-	[Parameter(Mandatory=$false)][string]$IPAddress20
+	[Parameter(Mandatory=$false)][string]$IPAddress20,
+	[Parameter(Mandatory=$false)][ValidateSet('2048','3072','4096')][string]$KeySize="2048"
 )
 
 # Get Present Location
@@ -269,17 +270,17 @@ If($OPENSSL){
 	#CNF Config
 
 If($CertType -eq "SubordinateCA"){
-$REQ = @'
+$REQ = @"
 [ req ]
 default_md = sha256
-default_bits = 4096
+default_bits = $KeySize
 default_keyfile = key.key
 distinguished_name = req_distinguished_name
 encrypt_key = no
 prompt = no
 string_mask = nombstr
 req_extensions = v3_ca
-'@ -replace "(?m)^\s+", ""
+"@ -replace "(?m)^\s+", ""
 
 $V3 = @"
 [ v3_ca ]
@@ -291,17 +292,17 @@ subjectKeyIdentifier = hash
 "@ -replace "(?m)^\s+", ""
 }
 If($CertType -eq "VCSA"){
-$REQ = @'
+$REQ = @"
 [ req ]
 default_md = sha256
-default_bits = 2048
+default_bits = $KeySize
 default_keyfile = key.key
 distinguished_name = req_distinguished_name
 encrypt_key = no
 prompt = no
 string_mask = nombstr
 req_extensions = v3_req
-'@ -replace "(?m)^\s+", ""
+"@ -replace "(?m)^\s+", ""
 
 $V3 = @"
 [ v3_req ]
@@ -313,17 +314,17 @@ subjectKeyIdentifier = hash
 "@ -replace "(?m)^\s+", ""
 }
 If($CertType -eq "Operations"){
-$REQ = @'
+$REQ = @"
 [ req ]
 default_md = sha256
-default_bits = 2048
+default_bits = $KeySize
 default_keyfile = key.key
 distinguished_name = req_distinguished_name
 encrypt_key = no
 prompt = no
 string_mask = nombstr
 req_extensions = v3_req
-'@ -replace "(?m)^\s+", ""
+"@ -replace "(?m)^\s+", ""
 
 $V3 = @"
 [ v3_req ]
@@ -334,17 +335,17 @@ subjectAltName = @alt_names
 "@ -replace "(?m)^\s+", ""
 }
 If($CertType -eq "WebServer"){
-$REQ = @'
+$REQ = @"
 [ req ]
 default_md = sha256
-default_bits = 2048
+default_bits = $KeySize
 default_keyfile = key.key
 distinguished_name = req_distinguished_name
 encrypt_key = no
 prompt = no
 string_mask = nombstr
 req_extensions = v3_req
-'@ -replace "(?m)^\s+", ""
+"@ -replace "(?m)^\s+", ""
 
 $V3 = @"
 [ v3_req ]
