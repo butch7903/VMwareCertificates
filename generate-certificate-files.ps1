@@ -226,6 +226,8 @@ $PEMGET = Get-Item "$CertLocation\$Shortname.pem" -ErrorAction SilentlyContinue
 $PEM = "$CertLocation\$Shortname.pem" # This is in PEM format
 $COMBINEDPEMNAME = "$Shortname-sslCertificateChain.pem"
 $COMBINEDPEM = "$CertLocation\$COMBINEDPEMNAME" # This is in PEM format. This is the file you use to install the certificate with.
+$COMBINEDPEMNAMENOKEY = "$Shortname-sslCertificateChain-NoKey.pem"
+$COMBINEDPEMNOKEY = "$CertLocation\$COMBINEDPEMNAMENOKEY"
 
 # Certificate Variables
 $CACERT = "$CertLocation\CA.pem" #This must be in PEM format, note this is copied from a network location typically #Example CombinedCA_HAMCA01-CA-PEM.pem
@@ -669,10 +671,15 @@ emailAddress = $EmailAddress
 				$STEP3 = Get-Content $CACERT 
 				$COMBINESTEPS = $STEP1 + $STEP2 + $STEP3
 				$COMBINESTEPS | Set-Content $COMBINEDPEM
+				$COMBINESTEPSNOKEY = $STEP1 + $STEP2
+				$COMBINESTEPSNOKEY | Set-Content $COMBINEDPEMNOKEY
 			}
 
 			# Update output for Unix format
 			[IO.File]::WriteAllText("$COMBINEDPEM", ([IO.File]::ReadAllText("$COMBINEDPEM") -replace "`r`n","`n"))
+			If($COMBINESTEPSNOKEY.count -ge 1){
+				[IO.File]::WriteAllText("$COMBINEDPEMNOKEY", ([IO.File]::ReadAllText("$COMBINEDPEMNOKEY") -replace "`r`n","`n"))
+			}
 			
 			# Output name of pem full chain
 			Set-Location $OpenSSLLocation
