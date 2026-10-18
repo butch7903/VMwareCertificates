@@ -199,7 +199,8 @@ param(
 	[Parameter(Mandatory=$false)][string]$IPAddress19,
 	[Parameter(Mandatory=$false)][string]$Shortname20,
 	[Parameter(Mandatory=$false)][string]$IPAddress20,
-	[Parameter(Mandatory=$false)][ValidateSet('2048','3072','4096')][string]$KeySize="2048"
+	[Parameter(Mandatory=$false)][ValidateSet('2048','3072','4096')][string]$KeySize="2048",
+	[Parameter(Mandatory=$false)][ValidateSet('2048','3072','4096')][string]$PublicKey="2048"
 )
 
 # Get Present Location
@@ -548,7 +549,7 @@ emailAddress = $EmailAddress
 	IF(!$KEYGET){
 		# Open OpenSSL EXE Location
 		Set-Location $OpenSSLLocation
-		.\openssl genrsa -out $KEY 4096
+		.\openssl genrsa -out $KEY $PublicKey
 
 		# Update output for Unix format
 		[IO.File]::WriteAllText("$KEY", ([IO.File]::ReadAllText("$KEY") -replace "`r`n","`n"))
