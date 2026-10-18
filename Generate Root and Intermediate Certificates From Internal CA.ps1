@@ -1,12 +1,10 @@
 <#
     .NOTES
-	===========================================================================
 	Created by:		Russell Hamker
-	Date:			January 2, 2025
-	Version:		4.1
+	Date:			October 18, 2026
+	Version:		5.0
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
-	===========================================================================
 
 	.SYNOPSIS
 		This script automates the generation of certificates from the Certificate Authorities Installed on your Windows PC and then combines the files for a certificate chain for later use.
@@ -16,12 +14,40 @@
 		automate the process of exporting the certificates.
 
 		Updated script for unix format output certificates
+
+	.EXAMPLE
+	#Example - 2 Layer Root + Intermediate CA
+	$RootName = "hamker" # Matches Root CAs with this name
+	$IntermediateName = "hamker" # Matches Intermediate CAs with this Name
+	$OutputDirectory = "C:\Certs"
+	.\'Generate Root and Intermediate Certificates From Internal CA.ps1' `
+	-RootName $RootName `
+	-IntermediateName $IntermediateName `
+	-OutputDirectory $OutputDirectory
+
+	.EXAMPLE
+	#Example - Root CA Only
+	$RootName = "hamker" # Matches Root CAs with this name
+	$OutputDirectory = "C:\Certs"
+	.\'Generate Root and Intermediate Certificates From Internal CA.ps1' `
+	-RootName $RootName `
+	-OutputDirectory $OutputDirectory
 #>
+param(
+	[Parameter(Mandatory=$true)][string]$RootName,
+	[Parameter(Mandatory=$false)][string]$IntermediateName,
+	[Parameter(Mandatory=$true)][string]$OutputDirectory="C:\Certs"
+)
+
+# If no Intermediate copy the root name
+If(!$IntermediateName){
+	$IntermediateName = $RootName
+}
 
 #Customizable Variables
-$ROOTMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
-$INTERMEDIATEMATCH = "hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
-$SSLOUTPUTDIRECTORY = "C:\Certs" #This is the directory where you want the exported certificates to placed
+$ROOTMATCH = $RootName #"hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Root Certificates Authorities
+$INTERMEDIATEMATCH = $IntermediateName #"hamker" #Match the name of the CAs you wish you gather certificates from. You will want to look at this via MMC>Certificates>Computer Account>Intermediate Certificates Authorities
+$SSLOUTPUTDIRECTORY = $OutPutDirectory #"C:\Certs" #This is the directory where you want the exported certificates to placed
 $OpenSSLLocation = "C:\Program Files\OpenSSL-Win64\bin" #x64 Version
 
 #Standard Variables
